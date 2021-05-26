@@ -10,14 +10,8 @@ contract Pussy is BEP20 {
 
     address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-    // Max transfer amount rate in basis points. (default is 0.5% of total supply)
-    uint16 public maxTransferAmountRate = 50;
-
     // Max transfer tax rate: 10%.
     uint16 public constant MAXIMUM_TRANSFER_TAX_RATE = 1000;
-
-    // Addresses that excluded from antiWhale
-    mapping(address => bool) private _excludedFromAntiWhale;
 
     // The operator can only update the transfer tax rate
     address private _operator;
@@ -77,35 +71,17 @@ contract Pussy is BEP20 {
         _;
     }
 
-    modifier antiWhale(address sender, address recipient, uint256 amount) {
-        if (maxTransferAmount() > 0) {
-            if (
-                _excludedFromAntiWhale[sender] == false
-                && _excludedFromAntiWhale[recipient] == false
-            ) {
-                require(amount <= maxTransferAmount(), "PUSSY::antiWhale: Transfer amount exceeds the maxTransferAmount");
-            }
-        }
-        _;
-    }
-
     /**
      * @notice Constructs the CougarToken contract.
      */
     constructor() public BEP20('Pussy', 'PUSSY') {
         _operator = _msgSender();
         emit OperatorTransferred(address(0), _operator);
-
-        _excludedFromAntiWhale[msg.sender] = true;
-        _excludedFromAntiWhale[address(0)] = true;
-        _excludedFromAntiWhale[address(this)] = true;
-        _excludedFromAntiWhale[BURN_ADDRESS] = true;
     }
 
 
-
     /// @dev overrides transfer function to meet tokenomics of PUSSY
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
+    function _transfer(address sender, address recipient, uint256 amount) internal virtual override {
 
         if (recipient == BURN_ADDRESS || transferTaxRate == 0) {
             super._transfer(sender, recipient, amount);
@@ -129,14 +105,6 @@ contract Pussy is BEP20 {
         return totalSupply().mul(maxTransferAmountRate).div(10000);
     }
 
-
-    /**
-     * @dev Returns the address is excluded from antiWhale or not.
-     */
-    function isExcludedFromAntiWhale(address _account) public view returns (bool) {
-        return _excludedFromAntiWhale[_account];
-    }
-
     /**
     * @dev Update the transfer tax rate.
     * Can only be called by the current operator.
@@ -156,14 +124,6 @@ contract Pussy is BEP20 {
         require(_maxTransferAmountRate <= 10000, "PUSSY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
         emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
         maxTransferAmountRate = _maxTransferAmountRate;
-    }
-
-    /**
-     * @dev Exclude or include an address from antiWhale.
-     * Can only be called by the current operator.
-     */
-    function setExcludedFromAntiWhale(address _account, bool _excluded) public onlyOperator {
-        _excludedFromAntiWhale[_account] = _excluded;
     }
 
     /**
@@ -349,7 +309,7 @@ contract Pussy is BEP20 {
         emit DelegateVotesChanged(delegatee, oldVotes, newVotes);
     }
 
-    function safe32(uint n, string   memory errorMessage) internal pure returns (uint32) {
+    function safe32(uint n, string memory errorMessage) internal pure returns (uint32) {
         require(n < 2**32, errorMessage);
         return uint32(n);
     }
