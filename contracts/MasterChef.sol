@@ -70,10 +70,13 @@ contract MasterChef is Ownable {
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
+
     constructor(
         Pussy _pussy,
         address _devaddr,
         address _feeAddress,
+        IBEP20 _pussyMaticLp,
+        IBEP20 _pussyUsdcLp,
         uint256 _pussyPerBlock,
         uint256 _startBlock
     ) public {
@@ -82,6 +85,29 @@ contract MasterChef is Ownable {
         feeAddress = _feeAddress;
         pussyPerBlock = _pussyPerBlock;
         startBlock = _startBlock;
+
+        add(2500, _pussy, 0, true);
+        add(5000, _pussyMaticLp, 0, true);
+        add(5000, _pussyUsdcLp, 0, true);//
+        add(400, BEP20(0x853Ee4b2A13f8a742d64C8F088bE7bA2131f670d), 400, true); // ETH - USDC
+        add(600, BEP20(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827), 400, true); // MATIC - USDC
+        add(600, BEP20(0xadbF1854e5883eB8aa7BAf50705338739e558E5b), 400, true); // MATIC - ETH
+        add(600, BEP20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270), 400, true); // MATIC
+        add(200, BEP20(0xD6DF932A45C0f255f85145f286eA0b292B21C90B), 400, true); // AAVE
+        add(200, BEP20(0x8A953CfE442c5E8855cc6c61b1293FA648BAE472), 400, true); // PDOGE
+        add(200, BEP20(0x3a3Df212b7AA91Aa0402B9035b098891d276572B), 400, true); // FISH
+        add(200, BEP20(0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39), 400, true); // LINK
+        add(200, BEP20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619), 400, true); // WETH
+        add(500, BEP20(0x82831E9565cb574375596eFc090da465283E22A4), 400, true); // QUICK
+        add(200, BEP20(0x2A88d21C52A9faAac0c458aC092c721C625F8f79), 400, true); // DAI
+        add(400, BEP20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174), 400, true); // USDC
+        add(200, BEP20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F), 400, true); // USDT
+        add(400, BEP20(0x264e6BC3f95633725658e4D9640f7F7D9100F6AC), 400, true); // PDOGE - MATIC
+        add(600, BEP20(0x019ba0325f1988213D448b3472fA1cf8D07618d7), 400, true); // QUICK - MATIC
+        add(400, BEP20(0x1F1E4c845183EF6d50E9609F16f6f9cAE43BC9Cb), 400, true); // QUICK - USDC
+        add(500, BEP20(0xdC9232E2Df177d7a12FdFf6EcBAb114E2231198D), 400, true); // WBTC - ETH
+        add(500, BEP20(0xf04adBF75cDFc5eD26eeA4bbbb991DB002036Bdd), 400, true); // USDC - DAI
+        add(400, BEP20(0x2cF7252e74036d1Da831d11089D326296e64a728), 400, true); // USDC - USDT
     }
 
     function poolLength() external view returns (uint256) {
