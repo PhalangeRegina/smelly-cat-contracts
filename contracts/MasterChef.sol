@@ -70,7 +70,6 @@ contract MasterChef is Ownable {
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
-
     constructor(
         Pussy _pussy,
         address _devaddr,
@@ -134,7 +133,7 @@ contract MasterChef is Ownable {
 
     // Update the given pool's PUSSY allocation point and deposit fee. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
-        require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
+        require(_depositFeeBP <= 400, "set: invalid deposit fee basis points");
         if (_withUpdate) {
             massUpdatePools();
         }
