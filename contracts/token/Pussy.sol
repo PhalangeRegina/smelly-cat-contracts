@@ -57,8 +57,6 @@ contract Pussy is BEP20 {
 
     event TransferTaxRateUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
 
-    event MaxTransferAmountRateUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
-
     /// @notice An event thats emitted when an account changes its delegate
     event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
@@ -92,17 +90,12 @@ contract Pussy is BEP20 {
             // default 92% of transfer sent to recipient
             uint256 sendAmount = amount.sub(burnAmount);
 
+            require(amount == sendAmount + burnAmount, "PUSSY::transfer: Burn value invalid");
+
             super._transfer(sender, BURN_ADDRESS, burnAmount);
             super._transfer(sender, recipient, sendAmount);
             amount = sendAmount;
         }
-    }
-
-    /**
-   * @dev Returns the max transfer amount.
-   */
-    function maxTransferAmount() public view returns (uint256) {
-        return totalSupply().mul(maxTransferAmountRate).div(10000);
     }
 
     /**
@@ -113,17 +106,6 @@ contract Pussy is BEP20 {
         require(_transferTaxRate <= MAXIMUM_TRANSFER_TAX_RATE, "PUSSY::updateTransferTaxRate: Transfer tax rate must not exceed the maximum rate.");
         emit TransferTaxRateUpdated(msg.sender, transferTaxRate, _transferTaxRate);
         transferTaxRate = _transferTaxRate;
-    }
-
-
-    /**
-     * @dev Update the max transfer amount rate.
-     * Can only be called by the current operator.
-     */
-    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate) public onlyOperator {
-        require(_maxTransferAmountRate <= 10000, "PUSSY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
-        emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
-        maxTransferAmountRate = _maxTransferAmountRate;
     }
 
     /**

@@ -2,10 +2,13 @@
 
 pragma solidity 0.6.12;
 
-import "./math/SafeMath.sol";
 import "./token/BEP20/IBEP20.sol";
 import "./token/BEP20/SafeBEP20.sol";
-import "./access/Ownable.sol";
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/tree/v4.1.0/contracts/GSN/Context.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/tree/v4.1.0/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/tree/v4.1.0/contracts/utils/ReentrancyGuard.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/tree/v4.1.0/contracts/ownership/Ownable.sol";
 
 import "./token/Pussy.sol";
 
@@ -16,7 +19,7 @@ import "./token/Pussy.sol";
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract MasterChef is Ownable {
+contract MasterChef is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
 
@@ -69,6 +72,9 @@ contract MasterChef is Ownable {
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
+    event SetFeeAddress(address indexed user, address indexed newAddress);
+    event SetDevAddress(address indexed user, address indexed newAddress);
+    event UpdateEmissionRate(address indexed user, uint256 goosePerBlock);
 
     constructor(
         Pussy _pussy,
@@ -86,20 +92,20 @@ contract MasterChef is Ownable {
         startBlock = _startBlock;
 
         add(2500, _pussy, 0, true);
-        add(5000, _pussyMaticLp, 0, true);
+        //add(5000, _pussyMaticLp, 0, true);
         add(5000, _pussyUsdcLp, 0, true);//
         add(400, BEP20(0x853Ee4b2A13f8a742d64C8F088bE7bA2131f670d), 400, true); // ETH - USDC
         add(600, BEP20(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827), 400, true); // MATIC - USDC
         add(600, BEP20(0xadbF1854e5883eB8aa7BAf50705338739e558E5b), 400, true); // MATIC - ETH
         add(600, BEP20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270), 400, true); // MATIC
         add(200, BEP20(0xD6DF932A45C0f255f85145f286eA0b292B21C90B), 400, true); // AAVE
-        add(200, BEP20(0x8a953cfe442c5e8855cc6c61b1293fa648bae472), 400, true); // PolyDoge
+        add(200, BEP20(0x8A953CfE442c5E8855cc6c61b1293FA648BAE472), 400, true); // PDOGE
         add(200, BEP20(0x3a3Df212b7AA91Aa0402B9035b098891d276572B), 400, true); // FISH
         add(200, BEP20(0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39), 400, true); // LINK
         add(200, BEP20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619), 400, true); // WETH
-        add(500, BEP20(0x831753DD7087CaC61aB5644b308642cc1c33Dc13), 400, true); // QUICK
-        add(200, BEP20(0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063), 400, true); // DAI
-        add(400, BEP20(0x2791bca1f2de4661ed88a30c99a7a9449aa84174), 400, true); // USDC
+        add(500, BEP20(0x82831E9565cb574375596eFc090da465283E22A4), 400, true); // QUICK
+        add(200, BEP20(0x2A88d21C52A9faAac0c458aC092c721C625F8f79), 400, true); // DAI
+        add(400, BEP20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174), 400, true); // USDC
         add(200, BEP20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F), 400, true); // USDT
         add(400, BEP20(0x264e6BC3f95633725658e4D9640f7F7D9100F6AC), 400, true); // PDOGE - MATIC
         add(600, BEP20(0x019ba0325f1988213D448b3472fA1cf8D07618d7), 400, true); // QUICK - MATIC
@@ -113,21 +119,27 @@ contract MasterChef is Ownable {
         return poolInfo.length;
     }
 
+    mapping(IBEP20 => bool) public poolExistence;
+    modifier nonDuplicated(IBEP20 _lpToken) {
+        require(poolExistence[_lpToken] == false, "nonDuplicated: duplicated");
+        _;
+    }
+
     // Add a new lp to the pool. Can only be called by the owner.
-    // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(uint256 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
+    function add(uint256 _allocPoint, IBEP20 _lpToken, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner nonDuplicated(_lpToken) {
         require(_depositFeeBP <= 400, "add: invalid deposit fee basis points");
         if (_withUpdate) {
             massUpdatePools();
         }
         uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
+        poolExistence[_lpToken] = true;
         poolInfo.push(PoolInfo({
-        lpToken: _lpToken,
-        allocPoint: _allocPoint,
-        lastRewardBlock: lastRewardBlock,
-        accPussyPerShare: 0,
-        depositFeeBP: _depositFeeBP
+        lpToken : _lpToken,
+        allocPoint : _allocPoint,
+        lastRewardBlock : lastRewardBlock,
+        accEggPerShare : 0,
+        depositFeeBP : _depositFeeBP
         }));
     }
 
@@ -189,7 +201,7 @@ contract MasterChef is Ownable {
     }
 
     // Deposit LP tokens to MasterChef for PUSSY allocation.
-    function deposit(uint256 _pid, uint256 _amount) public {
+    function deposit(uint256 _pid, uint256 _amount) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
@@ -201,6 +213,11 @@ contract MasterChef is Ownable {
         }
         if(_amount > 0) {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+            if (address(pool.lpToken) == address(pussy)) {
+                // burn 1% of token
+                uint256 transferTax = _amount.mul(1).div(100);
+                _amount = _amount.sub(transferTax);
+            }
             if(pool.depositFeeBP > 0){
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
@@ -214,7 +231,7 @@ contract MasterChef is Ownable {
     }
 
     // Withdraw LP tokens from MasterChef.
-    function withdraw(uint256 _pid, uint256 _amount) public {
+    function withdraw(uint256 _pid, uint256 _amount) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
@@ -232,7 +249,7 @@ contract MasterChef is Ownable {
     }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
-    function emergencyWithdraw(uint256 _pid) public {
+    function emergencyWithdraw(uint256 _pid) public nonReentrant {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         uint256 amount = user.amount;
@@ -245,32 +262,34 @@ contract MasterChef is Ownable {
     // Safe gaj transfer function, just in case if rounding error causes pool to not have enough PUSSYs.
     function safePussyTransfer(address _to, uint256 _amount) internal {
         uint256 pussyBal = pussy.balanceOf(address(this));
+        bool transferSuccess = false;
         if (_amount > pussyBal) {
-            pussy.transfer(_to, pussyBal);
+            transferSuccess = pussy.transfer(_to, pussyBal);
         } else {
-            pussy.transfer(_to, _amount);
+            transferSuccess = pussy.transfer(_to, _amount);
         }
+        require(transferSuccess, "safeBullTransfer: Transfer failed");
+
     }
 
     // Update dev address by the previous dev.
     function dev(address _devaddr) public {
         require(msg.sender == devaddr, "dev: wut?");
         devaddr = _devaddr;
+        emit SetDevAddress(msg.sender, _devaddr);
     }
 
     function setFeeAddress(address _feeAddress) public{
         require(msg.sender == feeAddress, "setFeeAddress: FORBIDDEN");
         feeAddress = _feeAddress;
+        emit SetFeeAddress(msg.sender, _feeAddress);
     }
 
     //Pancake has to add hidden dummy pools inorder to alter the emission, here we make it simple and transparent to all.
     function updateEmissionRate(uint256 _pussyPerBlock) public onlyOwner {
         massUpdatePools();
         pussyPerBlock = _pussyPerBlock;
+        emit UpdateEmissionRate(msg.sender, _eggPerBlock);
     }
 
-    //Only update before start of farm
-    function updateStartBlock(uint256 _startBlock) public onlyOwner {
-        startBlock = _startBlock;
-    }
 }

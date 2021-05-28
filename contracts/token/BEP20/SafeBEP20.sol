@@ -4,8 +4,10 @@
 pragma solidity >=0.6.0 <0.8.0;
 
 import "./IBEP20.sol";
-import "../../math/SafeMath.sol";
-import "../../Address.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/Context.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/Address.sol";
+
 
 /**
  * @title SafeBEP20

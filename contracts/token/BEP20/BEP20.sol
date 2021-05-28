@@ -2,11 +2,13 @@
 
 pragma solidity >=0.4.0;
 
-import '../../access/Ownable.sol';
-import '../../Context.sol';
 import './IBEP20.sol';
-import '../../math/SafeMath.sol';
-import '../../Address.sol';
+
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/ReentrancyGuard.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/math/SafeMath.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/Context.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v3.4.0/contracts/utils/Address.sol";
 
 
 /**
