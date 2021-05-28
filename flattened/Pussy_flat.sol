@@ -990,8 +990,8 @@ contract Pussy is BEP20 {
 
     address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
-    // Max transfer tax rate: 10%.
-    uint16 public constant MAXIMUM_TRANSFER_TAX_RATE = 1000;
+    // Max transfer tax rate: 5%.
+    uint16 public constant MAXIMUM_TRANSFER_TAX_RATE = 500;
 
     // The operator can only update the transfer tax rate
     address private _operator;
