@@ -92,19 +92,19 @@ contract MasterChef is Ownable, ReentrancyGuard {
         startBlock = _startBlock;
 
         add(2500, _pussy, 0, true);
-        //add(5000, _pussyMaticLp, 0, true);
+        add(5000, _pussyMaticLp, 0, true);
         add(5000, _pussyUsdcLp, 0, true);//
         add(400, BEP20(0x853Ee4b2A13f8a742d64C8F088bE7bA2131f670d), 400, true); // ETH - USDC
         add(600, BEP20(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827), 400, true); // MATIC - USDC
         add(600, BEP20(0xadbF1854e5883eB8aa7BAf50705338739e558E5b), 400, true); // MATIC - ETH
         add(600, BEP20(0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270), 400, true); // MATIC
         add(200, BEP20(0xD6DF932A45C0f255f85145f286eA0b292B21C90B), 400, true); // AAVE
-        add(200, BEP20(0x8A953CfE442c5E8855cc6c61b1293FA648BAE472), 400, true); // PDOGE
+        add(200, BEP20(0x8A953CfE442c5E8855cc6c61b1293FA648BAE472), 400, true); // PolyDoge
         add(200, BEP20(0x3a3Df212b7AA91Aa0402B9035b098891d276572B), 400, true); // FISH
         add(200, BEP20(0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39), 400, true); // LINK
         add(200, BEP20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619), 400, true); // WETH
-        add(500, BEP20(0x82831E9565cb574375596eFc090da465283E22A4), 400, true); // QUICK
-        add(200, BEP20(0x2A88d21C52A9faAac0c458aC092c721C625F8f79), 400, true); // DAI
+        add(500, BEP20(0x831753DD7087CaC61aB5644b308642cc1c33Dc13), 400, true); // QUICK
+        add(200, BEP20(0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063), 400, true); // DAI
         add(400, BEP20(0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174), 400, true); // USDC
         add(200, BEP20(0xc2132D05D31c914a87C6611C10748AEb04B58e8F), 400, true); // USDT
         add(400, BEP20(0x264e6BC3f95633725658e4D9640f7F7D9100F6AC), 400, true); // PDOGE - MATIC
@@ -138,7 +138,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
         lpToken : _lpToken,
         allocPoint : _allocPoint,
         lastRewardBlock : lastRewardBlock,
-        accEggPerShare : 0,
+        accPussyPerShare : 0,
         depositFeeBP : _depositFeeBP
         }));
     }
@@ -289,7 +289,7 @@ contract MasterChef is Ownable, ReentrancyGuard {
     function updateEmissionRate(uint256 _pussyPerBlock) public onlyOwner {
         massUpdatePools();
         pussyPerBlock = _pussyPerBlock;
-        emit UpdateEmissionRate(msg.sender, _eggPerBlock);
+        emit UpdateEmissionRate(msg.sender, _pussyPerBlock);
     }
 
 }

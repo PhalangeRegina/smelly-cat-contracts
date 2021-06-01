@@ -9,7 +9,7 @@ interface IBEP20 {
     function totalSupply() external view returns (uint256);
 
     /**
-     * @dev Returns the token decimals.
+     * @dev Returns the token decimals
      */
     function decimals() external view returns (uint8);
 
