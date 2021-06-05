@@ -52,8 +52,6 @@ contract NFTMarketplace is ERC721, Ownable, ReentrancyGuard {
 
     }
 
-    IERC20[] public purchaseTokens; // list of IERC20-ready purchaseTokens
-
     Nft[] public nfts; // array of all NFTs available for purchase
 
     constructor() public ERC721("SmellyCat NFTs", "SCNFT") {
@@ -64,14 +62,6 @@ contract NFTMarketplace is ERC721, Ownable, ReentrancyGuard {
         artistFeePct = 500;
         redistributionPct = 4000;
 
-    }
-
-    // Add purchasing tokens (WMATIC, native tokens, etc.)
-    function addPurchaseToken(address tokenAddress) external onlyOwner() {
-        for (uint256 i=0; i < purchaseTokens.length; i++){
-            require(address(purchaseTokens[i]) != address(tokenAddress), "addPurchaseToken:: Purchasing token already exists");
-        }
-        purchaseTokens.push(IERC20(tokenAddress));
     }
 
     // Add new NFTs
@@ -224,7 +214,7 @@ contract NFTMarketplace is ERC721, Ownable, ReentrancyGuard {
     }
 
     //get tokens balance on contract
-    function getTokenBalance(uint256 purchaseTokenID) public view returns (uint256) {
+    function getTokenBalance() public view returns (uint256) {
         return purchaseToken.balanceOf(address(this));
     }
 }
